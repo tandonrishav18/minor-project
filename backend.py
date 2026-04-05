@@ -97,7 +97,7 @@ def receive_data(data: SensorData):
     INSERT INTO readings 
     (node_id, temperature, humidity, aqi,
      temporal_score, spatial_score, rate_score,
-     anomaly_score, confidence, anomaly_flag, ml_flag)
+     anomaly_score, confidence, anomaly_flag, ml_flag, true_label)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data.node_id,
@@ -110,7 +110,8 @@ def receive_data(data: SensorData):
         score,
         confidence,
         flag,
-        ml_flag
+        ml_flag,
+        data.true_label
     ))
 
     conn.commit()

@@ -15,6 +15,22 @@ from sklearn.metrics import (
 )
 
 # -------------------------------
+# IMPORT MODELS
+# -------------------------------
+from models.statistical_models import (
+    temporal_model,
+    spatial_model,
+    temporal_spatial_model,
+    hybrid_model
+)
+
+from models.ml_models import (
+    isolation_forest_model,
+    lof_model,
+    svm_model
+)
+
+# -------------------------------
 # LOAD DATA
 # -------------------------------
 conn = sqlite3.connect("database.db")
@@ -34,29 +50,35 @@ if df.empty:
 df = df.dropna(subset=["anomaly_score", "anomaly_flag"])
 
 # -------------------------------
-# TRUE LABEL (IMPORTANT FIX)
+# TRUE LABEL
 # -------------------------------
 if "true_label" in df.columns:
-    y_true = df["true_label"]
+    y_true = df["true_label"].astype(int)
 else:
-    print("WARNING: true_label missing → fallback to anomaly_flag")
-    y_true = df["anomaly_flag"]
-
-# Ensure binary
-y_true = y_true.astype(int)
+    print("WARNING: true_label missing → using anomaly_flag")
+    y_true = df["anomaly_flag"].astype(int)
 
 # -------------------------------
-# MODEL PREDICTIONS
+# GENERATE PREDICTIONS
 # -------------------------------
-y_pred_custom = (df["anomaly_score"] > 3).astype(int)
+print("\nGenerating predictions...")
 
-if "ml_flag" in df.columns:
-    y_pred_ml = df["ml_flag"].astype(int)
-else:
-    y_pred_ml = np.zeros(len(df))
+pred_temporal = temporal_model(df)
+pred_spatial = spatial_model(df)
+pred_ts = temporal_spatial_model(df)
+pred_hybrid = hybrid_model(df)
+
+pred_if = isolation_forest_model(df)
+pred_lof = lof_model(df)
+pred_svm = svm_model(df)
+
+# store predictions (useful for analysis)
+df["pred_if"] = pred_if
+df["pred_lof"] = pred_lof
+df["pred_svm"] = pred_svm
 
 # -------------------------------
-# SAFE EVALUATION FUNCTIONS
+# SAFE EVALUATION
 # -------------------------------
 def evaluate(y_true, y_pred):
     return {
@@ -66,96 +88,58 @@ def evaluate(y_true, y_pred):
         "accuracy": accuracy_score(y_true, y_pred)
     }
 
+# -------------------------------
+# EVALUATE ALL MODELS
+# -------------------------------
+results = {}
 
-def evaluate_all_models(df):
+results["temporal"] = evaluate(y_true, pred_temporal)
+results["spatial"] = evaluate(y_true, pred_spatial)
+results["temp_spatial"] = evaluate(y_true, pred_ts)
+results["hybrid"] = evaluate(y_true, pred_hybrid)
 
-    y_true = df["true_label"] if "true_label" in df.columns else df["anomaly_flag"]
-
-    results = {}
-
-    # Model A: Temporal
-    results["temporal"] = evaluate(
-        y_true,
-        (df["temporal_score"] > 2).astype(int)
-    )
-
-    # Model B: Spatial
-    results["spatial"] = evaluate(
-        y_true,
-        (df["spatial_score"] > 2).astype(int)
-    )
-
-    # Model C: Temporal + Spatial
-    results["temp_spatial"] = evaluate(
-        y_true,
-        ((df["temporal_score"] + df["spatial_score"]) > 3).astype(int)
-    )
-
-    # Model D: Hybrid
-    results["hybrid"] = evaluate(
-        y_true,
-        df["anomaly_flag"]
-    )
-
-    # Model E: ML
-    if "ml_flag" in df.columns:
-        results["ml"] = evaluate(y_true, df["ml_flag"])
-
-    return results
-
+results["isolation_forest"] = evaluate(y_true, pred_if)
+results["lof"] = evaluate(y_true, pred_lof)
+results["svm"] = evaluate(y_true, pred_svm)
 
 # -------------------------------
-# CONFUSION MATRICES
+# PRINT RESULTS
+# -------------------------------
+metrics_df = pd.DataFrame(results).T.reset_index()
+metrics_df.rename(columns={"index": "Model"}, inplace=True)
+
+print("\n===== MODEL RESULTS =====")
+print(metrics_df)
+
+metrics_df.to_csv("metrics_all_models.csv", index=False)
+
+# -------------------------------
+# CONFUSION MATRIX (HYBRID)
 # -------------------------------
 if len(np.unique(y_true)) > 1:
-
-    # Custom
-    cm = confusion_matrix(y_true, y_pred_custom)
+    cm = confusion_matrix(y_true, pred_hybrid)
     ConfusionMatrixDisplay(cm).plot()
-    plt.title("Confusion Matrix - Hybrid Model")
+    plt.title("Confusion Matrix - Hybrid")
     plt.savefig("cm_hybrid.png")
     plt.show()
-
-    # ML
-    if "ml_flag" in df.columns:
-        cm = confusion_matrix(y_true, y_pred_ml)
-        ConfusionMatrixDisplay(cm).plot()
-        plt.title("Confusion Matrix - ML Model")
-        plt.savefig("cm_ml.png")
-        plt.show()
-
 else:
-    print("Not enough class variation for confusion matrix")
+    print("Confusion matrix skipped (single class)")
 
 # -------------------------------
-# ROC CURVE (SAFE)
+# ROC CURVE (HYBRID)
 # -------------------------------
 if len(np.unique(y_true)) > 1:
     fpr, tpr, _ = roc_curve(y_true, df["anomaly_score"])
     roc_auc = auc(fpr, tpr)
 
-    plt.plot(fpr, tpr, label=f"Hybrid AUC = {roc_auc:.2f}")
+    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.2f}")
     plt.plot([0, 1], [0, 1], linestyle="--")
-
     plt.legend()
-    plt.title("ROC Curve")
+    plt.title("ROC Curve - Hybrid")
     plt.savefig("roc_curve.png")
     plt.show()
 else:
-    print("ROC skipped (only one class)")
-
-# -------------------------------
-# MULTI-MODEL EVALUATION
-# -------------------------------
-results = evaluate_all_models(df)
-
-metrics_df = pd.DataFrame(results).T.reset_index()
-metrics_df.rename(columns={"index": "Model"}, inplace=True)
-
-print("\nMULTI-MODEL RESULTS:")
-print(metrics_df)
-
-metrics_df.to_csv("metrics_all_models.csv", index=False)
+    print("ROC skipped (single class)")
 
 # -------------------------------
 # MODEL COMPARISON GRAPH
