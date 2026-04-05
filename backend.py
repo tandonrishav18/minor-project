@@ -41,7 +41,7 @@ class SensorData(BaseModel):
     aqi: float
     latitude: float
     longitude: float
-
+    true_label: int 
 # -------------------------------
 # MAIN API
 # -------------------------------

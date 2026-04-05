@@ -1,0 +1,8 @@
+CONFIG = {
+    "alpha": 0.5,
+    "beta": 0.3,
+    "gamma": 0.2,
+    "threshold": 3,
+    "history_window": 10,
+    "neighbors_k": 3
+}

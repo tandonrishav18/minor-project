@@ -17,30 +17,42 @@ while True:
 
         lat, lon = NODE_LOCATIONS[node_id]
 
-        # ---------------- BASE VALUES ----------------
+        true_label = 0  # default = normal
+
         temperature = random.uniform(28, 32)
         humidity = random.uniform(60, 80)
         aqi = random.uniform(80, 120)
 
-        # ---------------- GLOBAL ANOMALY ----------------
-        if random.random() < 0.1:
+        # -------------------------------
+        # GLOBAL ANOMALY
+        # -------------------------------
+        if random.random() < 0.05:
             temperature += random.uniform(7, 12)
             humidity -= random.uniform(5, 10)
             aqi += random.uniform(30, 60)
+            true_label = 1
 
-        # ---------------- LOCAL CLUSTER ----------------
+        # -------------------------------
+        # LOCAL CLUSTER
+        # -------------------------------
         if node_id in [5, 6, 7]:
             temperature += random.uniform(3, 6)
             humidity -= random.uniform(5, 10)
+            true_label = 1
 
-        # ---------------- AQI HOTSPOT ----------------
-        if node_id in [10, 11] and random.random() < 0.4:
+        # -------------------------------
+        # AQI SPIKE
+        # -------------------------------
+        if node_id in [10, 11] and random.random() < 0.3:
             aqi += random.uniform(50, 100)
-            humidity -= random.uniform(3, 7)
+            true_label = 1
 
-        # ---------------- SENSOR FAILURE ----------------
-        if random.random() < 0.03:
+        # -------------------------------
+        # SENSOR FAILURE
+        # -------------------------------
+        if random.random() < 0.02:
             temperature = random.uniform(0, 100)
+            true_label = 1
 
         data = {
             "node_id": node_id,
@@ -48,7 +60,8 @@ while True:
             "humidity": humidity,
             "aqi": aqi,
             "latitude": lat,
-            "longitude": lon
+            "longitude": lon,
+            "true_label": true_label
         }
 
         try:
