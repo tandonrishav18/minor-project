@@ -95,15 +95,17 @@ def receive_data(data: SensorData):
 
     cursor.execute("""
     INSERT INTO readings 
-    (node_id, temperature, humidity, aqi,
+    (node_id, temperature, humidity, aqi,latitude, longitude,
      temporal_score, spatial_score, rate_score,
      anomaly_score, confidence, anomaly_flag, ml_flag, true_label)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data.node_id,
         data.temperature,
         data.humidity,
         data.aqi,
+        data.latitude,
+        data.longitude,
         temporal,
         spatial,
         rate,

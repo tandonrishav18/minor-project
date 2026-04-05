@@ -1,28 +1,15 @@
-import pandas as pd
+# models/statistical_models.py
 
-# -------------------------------
-# TEMPORAL MODEL
-# -------------------------------
-def temporal_model(df, threshold=2):
-    return (df["temporal_score"] > threshold).astype(int)
+import numpy as np
 
+def temporal_model(df):
+    return (df["temporal_score"] > 2).astype(int)
 
-# -------------------------------
-# SPATIAL MODEL
-# -------------------------------
-def spatial_model(df, threshold=2):
-    return (df["spatial_score"] > threshold).astype(int)
+def spatial_model(df):
+    return (df["spatial_score"] > 2).astype(int)
 
+def combined_model(df):
+    return ((df["temporal_score"] + df["spatial_score"]) > 3).astype(int)
 
-# -------------------------------
-# TEMPORAL + SPATIAL MODEL
-# -------------------------------
-def temporal_spatial_model(df, threshold=3):
-    return ((df["temporal_score"] + df["spatial_score"]) > threshold).astype(int)
-
-
-# -------------------------------
-# FULL HYBRID MODEL
-# -------------------------------
 def hybrid_model(df):
-    return df["anomaly_flag"]
+    return df["anomaly_flag"].values
