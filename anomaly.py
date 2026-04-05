@@ -1,56 +1,58 @@
 import sqlite3
 import numpy as np
 
-def compute_anomaly(node_id, current_temp):
+neighbors = {
+    "node_1": ["node_2"],
+    "node_2": ["node_1", "node_3"],
+    "node_3": ["node_2"]
+}
+
+def compute_anomaly(node_id, current_temp, sim_state):
+
     conn = sqlite3.connect("climate.db")
     cursor = conn.cursor()
 
-    # Temporal Data
     cursor.execute("""
-        SELECT temperature FROM readings 
-        WHERE node_id=? 
+        SELECT temperature FROM readings
+        WHERE node_id=?
         ORDER BY id DESC LIMIT 20
     """, (node_id,))
-    
     rows = cursor.fetchall()
     temps = [r[0] for r in rows]
 
-    # Not enough data
     if len(temps) < 5:
         conn.close()
-        return 0, 0
+        return 0,0,0,0,0,0
 
     mean = np.mean(temps)
     std = np.std(temps)
 
-    D_T = abs(current_temp - mean) / std if std != 0 else 0
+    temporal_score = abs(current_temp - mean) / std if std != 0 else 0
 
-    # Spatial Deviation
-    cursor.execute("""
-        SELECT temperature FROM readings 
-        WHERE node_id!=? 
-        ORDER BY id DESC LIMIT 5
-    """, (node_id,))
-    
-    spatial_rows = cursor.fetchall()
-    neighbor_temps = [r[0] for r in spatial_rows]
+    spatial_temps = []
+    for n in neighbors.get(node_id, []):
+        cursor.execute("""
+            SELECT temperature FROM readings
+            WHERE node_id=?
+            ORDER BY id DESC LIMIT 1
+        """, (n,))
+        r = cursor.fetchone()
+        if r:
+            spatial_temps.append(r[0])
 
-    if neighbor_temps:
-        D_S = np.mean([abs(current_temp - t) for t in neighbor_temps])
-    else:
-        D_S = 0
+    spatial_score = np.mean([abs(current_temp - t) for t in spatial_temps]) if spatial_temps else 0
 
-    # Rate of Change
-    if temps:
-        D_R = abs(current_temp - temps[0])
-    else:
-        D_R = 0
+    rate_score = abs(current_temp - temps[0])
 
-    # Final Score
-    alpha, beta, gamma = 0.5, 0.3, 0.2
-    anomaly_score = alpha*D_T + beta*D_S + gamma*D_R
+    alpha = sim_state["alpha"]
+    beta = sim_state["beta"]
+    gamma = sim_state["gamma"]
+    threshold = sim_state["threshold"]
 
-    anomaly_flag = 1 if anomaly_score > 5 else 0
+    anomaly_score = alpha*temporal_score + beta*spatial_score + gamma*rate_score
+    anomaly_flag = 1 if anomaly_score > threshold else 0
+    confidence = anomaly_score / (threshold*2)
 
     conn.close()
-    return anomaly_score, anomaly_flag
+
+    return temporal_score, spatial_score, rate_score, anomaly_score, confidence, anomaly_flag
