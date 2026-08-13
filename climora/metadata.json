@@ -1,0 +1,6 @@
+{
+  "name": "CLIMORA",
+  "description": "Real-time spatio-temporal environmental telemetry and AI-driven anomaly detection platform for edge sensor networks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
