@@ -5,12 +5,12 @@ export const Footer: React.FC = () => {
   return (
     <footer 
       id="main-footer"
-      className="w-full mt-auto border-t border-[#3a494b] bg-[#0b141c] flex flex-col md:flex-row justify-between items-center px-6 md:px-12 py-4 gap-3 text-xs shrink-0"
+      className="w-full mt-auto border-t border-[#3a494b] bg-[#0b141c] flex flex-col md:flex-row justify-between items-center px-4 md:px-8 py-2.5 gap-2 text-[11px] shrink-0"
     >
       <div className="flex items-center gap-2">
-        <ClimoraLogo size={20} />
+        <ClimoraLogo size={18} />
         <p className="font-label-caps text-[#b8c3ff] font-medium text-center md:text-left">
-          © 2024 CLIMORA Spatio-Temporal Intelligence. All systems operational.
+          © 2024 CLIMORA Spatio-Temporal Intelligence.
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 font-label-caps text-[#b9cacb]">

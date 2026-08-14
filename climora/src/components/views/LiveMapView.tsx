@@ -178,61 +178,63 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
         })}
       </div>
 
-      {/* Floating Left Inspection Card (Matching Screenshot exactly for CE-9021) */}
-      <div className="absolute top-16 md:top-20 left-4 md:left-6 w-80 md:w-88 z-20 pointer-events-none">
+      {/* Floating Bottom Left Inspection Card */}
+      <div className="absolute bottom-4 left-4 md:left-6 w-64 sm:w-72 z-20 pointer-events-none">
         {activeNode && (
-          <div className="pointer-events-auto bg-[#161B22]/95 border border-[#30363D] rounded-xl p-4 shadow-2xl backdrop-blur-md space-y-4 animate-in fade-in slide-in-from-left-4">
+          <div className="pointer-events-auto bg-[#161B22]/95 border border-[#30363D] rounded-lg p-3 shadow-2xl backdrop-blur-md space-y-2.5 animate-in fade-in slide-in-from-bottom-3">
             {/* Header */}
-            <div className="flex justify-between items-start border-b border-[#30363D] pb-3">
+            <div className="flex justify-between items-center border-b border-[#30363D] pb-2">
               <div>
-                <span className="font-label-caps text-[11px] text-[#849495] uppercase tracking-wider block">
+                <span className="font-label-caps text-[9px] text-[#849495] uppercase tracking-wider block">
                   NODE ID
                 </span>
-                <h3 className="font-bold text-2xl text-[#e1fdff] tracking-tight mt-0.5">
+                <h3 className="font-bold text-base text-[#e1fdff] tracking-tight">
                   {activeNode.id}
                 </h3>
               </div>
-              <div className={`px-2.5 py-1 rounded font-label-caps text-xs font-bold ${
-                activeNode.status === 'Warning' || activeNode.anomalyScore > 0.75
-                  ? 'bg-[#FFD700] text-black'
-                  : activeNode.status === 'Offline'
-                  ? 'bg-[#ffb4ab] text-black'
-                  : 'bg-[#37fa87] text-black'
-              }`}>
-                {activeNode.status}
+              <div className="flex items-center gap-1.5">
+                <span className={`px-2 py-0.5 rounded font-label-caps text-[10px] font-bold ${
+                  activeNode.status === 'Warning' || activeNode.anomalyScore > 0.75
+                    ? 'bg-[#FFD700] text-black'
+                    : activeNode.status === 'Offline'
+                    ? 'bg-[#ffb4ab] text-black'
+                    : 'bg-[#37fa87] text-black'
+                }`}>
+                  {activeNode.status}
+                </span>
               </div>
             </div>
 
-            {/* Metrics 2-column */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#141c24] p-3 rounded border border-[#30363D]">
-                <span className="font-label-caps text-[11px] text-[#849495] block mb-1">
-                  Temperature
+            {/* Metrics 2-column (Compact) */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-[#141c24] p-2 rounded border border-[#30363D]">
+                <span className="font-label-caps text-[10px] text-[#849495] block mb-0.5">
+                  Temp
                 </span>
-                <span className="font-mono-data text-lg font-bold text-[#e1fdff]">
+                <span className="font-mono-data text-sm font-bold text-[#e1fdff]">
                   {formatTemp(activeNode.temperature)}
                 </span>
               </div>
-              <div className="bg-[#141c24] p-3 rounded border border-[#30363D]">
-                <span className="font-label-caps text-[11px] text-[#849495] block mb-1">
+              <div className="bg-[#141c24] p-2 rounded border border-[#30363D]">
+                <span className="font-label-caps text-[10px] text-[#849495] block mb-0.5">
                   Humidity
                 </span>
-                <span className="font-mono-data text-lg font-bold text-[#e1fdff]">
+                <span className="font-mono-data text-sm font-bold text-[#e1fdff]">
                   {activeNode.humidity}%
                 </span>
               </div>
             </div>
 
             {/* AQI Level Card with Progress Bar */}
-            <div className="bg-[#141c24] p-3.5 rounded border border-[#FFD700]/50">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-label-caps text-xs text-[#b9cacb]">AQI Level</span>
-                <span className="font-mono-data text-sm text-[#FFD700] font-bold">
+            <div className="bg-[#141c24] p-2 rounded border border-[#FFD700]/40">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-label-caps text-[10px] text-[#b9cacb]">AQI Level</span>
+                <span className="font-mono-data text-xs text-[#FFD700] font-bold">
                   {activeNode.aqi}
                 </span>
               </div>
               {/* Progress bar */}
-              <div className="w-full h-1.5 bg-[#2d363e] rounded-full overflow-hidden">
+              <div className="w-full h-1 bg-[#2d363e] rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-[#FFD700] rounded-full transition-all duration-500"
                   style={{ width: `${Math.min(activeNode.aqi, 100)}%` }}
@@ -241,23 +243,23 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
             </div>
 
             {/* Coordinates & Anomaly Score */}
-            <div className="space-y-2 font-mono-data text-xs">
-              <div className="flex justify-between items-center border-b border-[#30363D]/60 pb-1.5">
+            <div className="space-y-1 font-mono-data text-[11px]">
+              <div className="flex justify-between items-center border-b border-[#30363D]/60 pb-1">
                 <span className="text-[#849495]">Location</span>
-                <span className="text-[#00f2ff]">
+                <span className="text-[#00f2ff] text-[10px]">
                   {activeNode.lat.toFixed(4)}, {activeNode.lng.toFixed(4)}
                 </span>
               </div>
-              <div className="flex justify-between items-center border-b border-[#30363D]/60 pb-1.5">
-                <span className="text-[#849495]">Anomaly Score</span>
+              <div className="flex justify-between items-center border-b border-[#30363D]/60 pb-1">
+                <span className="text-[#849495]">Anomaly</span>
                 <span className={`font-bold ${activeNode.anomalyScore > 0.7 ? 'text-[#FFD700]' : 'text-[#37fa87]'}`}>
                   {activeNode.anomalyScore.toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-[11px] text-[#849495]">
-                <span>Firmware / Power</span>
+              <div className="flex justify-between items-center text-[10px] text-[#849495] pt-0.5">
+                <span>Power / Model</span>
                 <span className="text-[#dae3ee]">
-                  {activeNode.firmwareVersion} ({activeNode.powerType})
+                  {activeNode.powerType}
                 </span>
               </div>
             </div>
@@ -266,26 +268,25 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
             <button
               id="btn-calibrate-node"
               onClick={() => onOpenCalibrate(activeNode)}
-              className="w-full border border-[#00f2ff] text-[#00f2ff] hover:bg-[#00f2ff] hover:text-[#002022] font-label-caps text-xs uppercase font-bold py-2.5 rounded transition-colors flex justify-center items-center gap-2 active:scale-[0.98] cursor-pointer"
+              className="w-full border border-[#00f2ff] text-[#00f2ff] hover:bg-[#00f2ff] hover:text-[#002022] font-label-caps text-[11px] uppercase font-bold py-1.5 rounded transition-colors flex justify-center items-center gap-1.5 active:scale-[0.98] cursor-pointer"
             >
-              <Sliders className="w-4 h-4" />
+              <Sliders className="w-3.5 h-3.5" />
               <span>Calibrate Node</span>
             </button>
           </div>
         )}
       </div>
 
-      {/* Bottom Weather / Conditions HUD Bar */}
-      <div className="absolute bottom-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-auto z-20 bg-[#0A0C10]/90 border border-[#30363D] rounded-lg px-6 py-2 backdrop-blur-md shadow-2xl flex items-center justify-between md:justify-center gap-6 font-mono-data text-xs text-[#dae3ee]">
-        <div className="flex items-center gap-2">
-          <Sun className="w-4 h-4 text-[#FFD700]" />
-          <span>CURRENT: LOS ANGELES, CA | 12:04 AM PDT</span>
+      {/* Bottom Weather / Conditions HUD Bar (Small & Compact on Bottom-Right) */}
+      <div className="absolute bottom-4 right-4 md:right-6 z-20 bg-[#0A0C10]/90 border border-[#30363D] rounded-lg px-3.5 py-1.5 backdrop-blur-md shadow-2xl flex items-center gap-3 font-mono-data text-[11px] text-[#dae3ee]">
+        <div className="flex items-center gap-1.5">
+          <Sun className="w-3.5 h-3.5 text-[#FFD700] shrink-0" />
+          <span>LOS ANGELES | 12:04 AM PDT</span>
         </div>
-        <div className="hidden sm:flex items-center gap-4 text-[#849495]">
+        <div className="hidden sm:flex items-center gap-3 text-[#849495] text-[10.5px]">
           <span className="text-[#e1fdff] font-bold">58°F</span>
-          <span>Wind: 7 mph W</span>
+          <span>Wind: 7 mph</span>
           <span>Precip: 0%</span>
-          <span>UV Index: 0</span>
         </div>
       </div>
     </div>
